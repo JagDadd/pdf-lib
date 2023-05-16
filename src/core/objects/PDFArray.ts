@@ -171,6 +171,15 @@ class PDFArray extends PDFObject {
     return offset - initialOffset;
   }
 
+  translatePDFNumbers(x: number, y: number): void {
+    for (let idx = 0, len = this.size(); idx < len; idx++) {
+      const el = this.lookup(idx);
+      if (el instanceof PDFNumber) {
+        this.set(idx, PDFNumber.of(el.asNumber() + (idx % 2 === 0 ? x : y)));
+      }
+    }
+  }
+
   scalePDFNumbers(x: number, y: number): void {
     for (let idx = 0, len = this.size(); idx < len; idx++) {
       const el = this.lookup(idx);

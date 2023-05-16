@@ -532,6 +532,20 @@ export default class PDFPage {
     return artBox?.asRectangle() ?? this.getCropBox();
   }
 
+
+  /**
+   * Translates this page's content and annotations to a new location on this page.
+   * @param x 
+   * @param y 
+   */
+  translate(x: number, y: number): void {
+    assertIs(x, 'x', ['number']);
+    assertIs(y, 'y', ['number']);
+
+    this.translateContent(x, y);
+    this.translateAnnotations(x, y);
+  }
+
   /**
    * Translate this page's content to a new location on the page. This operation
    * is often useful after resizing the page with [[setSize]]. For example:
@@ -566,6 +580,43 @@ export default class PDFPage {
     const endRef = this.doc.context.register(end);
 
     this.node.wrapContentStreams(startRef, endRef);
+  }
+
+  /**
+   * Translate this page's annotations to a new location on the page. This operation
+   * is often useful after resizing the page with [[setSize]].
+   * @param x
+   * @param y 
+   */
+  translateAnnotations(x: number, y: number) {
+    assertIs(x, 'x', ['number']);
+    assertIs(y, 'y', ['number']);
+
+    const annots = this.node.Annots();
+
+    if (!annots) return;
+
+    for (let idx = 0; idx < annots.size(); idx++) {
+      const annot = annots.lookup(idx);
+      if (annot instanceof PDFDict)
+        this.translateAnnotation(annot, x, y);
+    }
+  }
+
+  private translateAnnotation(annot: PDFDict, x: number, y: number) {
+    const selectors = ['RD', 'CL', 'Vertices', 'QuadPoints', 'L', 'Rect']
+    for (let idx = 0, len = selectors.length; idx < len; idx++) {
+      const list = annot.lookup(PDFName.of(selectors[idx]))
+      if (list instanceof PDFArray) list.translatePDFNumbers(x,y)
+    }
+
+    const inkLists = annot.lookup(PDFName.of('InkList'))
+    if (inkLists instanceof PDFArray) {
+        for (let idx = 0, len = inkLists.size(); idx < len; idx++) {
+        const arr = inkLists.lookup(idx)
+        if (arr instanceof PDFArray) arr.translatePDFNumbers(x,y)
+      }
+    }
   }
 
   /**

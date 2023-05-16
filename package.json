@@ -1,6 +1,6 @@
 {
   "name": "pdf-lib",
-  "version": "1.17.1",
+  "version": "1.17.2",
   "description": "Create and modify PDF files with JavaScript",
   "author": "Andrew Dillon <andrew.dillon.j@gmail.com>",
   "contributors": [
@@ -32,6 +32,7 @@
     "Ching Chang (https://github.com/ChingChang9)"
   ],
   "scripts": {
+    "prepare": "yarn clean && yarn lint && yarn typecheck && yarn test && yarn build",
     "release:latest": "yarn publish --tag latest && yarn pack && yarn release:tag",
     "release:next": "yarn publish --tag next",
     "release:prep": "yarn clean && yarn lint && yarn typecheck && yarn test && yarn build",
